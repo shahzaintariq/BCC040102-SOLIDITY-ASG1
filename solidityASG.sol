@@ -1,51 +1,59 @@
-pragma solidity ^0.5.11;
+pragma solidity ^0.5.0;
 
-contract student{
-    enum class {onsite,online}
-    enum gender {male,female}
+contract StudentEnrolment{
     
-    struct studentData{
+    address  payable private myAddress;
+    
+    enum Gender{Male, Female}
+    enum Class{Onsite, Online}
+    
+    struct Student{
         string name;
-        uint rollNum;
-        bool hasDegree;
-        gender myGender;
-        class myClass;
+        uint age;
+        address addr;
+        bool degree;
+        Gender gender;
+        Class class;
+        uint rollNumber;
+    }
+    uint public noOfStudents;
+    
+    mapping(uint => Student)studentData;
+    
+    function setMyAddress(address payable _myAddress)public{
+        myAddress = _myAddress;
     }
     
-    mapping(uint => studentData) students;
-
-    uint numberOfstudents;
-    
-    
-    address payable private myAddress = 0xCA35b7d915458EF540aDe6068dFe2F44E8fa733c;
-    function setAddress(address payable add) public {
-        myAddress = add;
+    function enrollStudent(string memory _name, uint _age, address _address, bool _haveDegree, Gender _gender, Class _class, uint _rollNumber)public payable{
+        
+        require(msg.value >= 2 ether);
+       
+        Student memory myStudent = Student(_name, _age, _address, _haveDegree, _gender, _class, _rollNumber);
+        
+        myAddress.transfer(msg.value);
+        
+        studentData[_rollNumber] = myStudent;
+        noOfStudents++;
     }
     
-    function getbalane() public view returns(uint){
+    function getStudentData(uint _rollNumber)public view returns(string memory, uint, address, bool,Gender,Class,uint){
+        return(
+            studentData[_rollNumber].name,
+            studentData[_rollNumber].age,
+            studentData[_rollNumber].addr,
+            studentData[_rollNumber].degree,
+            studentData[_rollNumber].gender,
+            studentData[_rollNumber].class,
+            studentData[_rollNumber].rollNumber
+             );
+    }
+    
+    function balance()public view returns(uint){
         return myAddress.balance;
     }
-    function getAddress() public view returns(address){
-        return myAddress;
-    }
-    function enroll(string memory yourName, uint RollNum, bool yourDegree, gender yourgender, class yourclass ) public payable returns(string memory){
-        require(msg.value >= 2 ether);
-        myAddress.transfer(msg.value); 
-        studentData memory ssdata = studentData(yourName,RollNum,yourDegree,yourgender,yourclass);
-        students[RollNum] = ssdata;
-        numberOfstudents;
 
+    function hasDegree(uint _rollNumber)public view returns(bool){
+        return studentData[_rollNumber].degree;
     }
     
-    
-    function getStudentsData(uint RollNum)public view returns(string memory,uint,bool,gender,class,uint){
-        return (
-            students[RollNum].name,
-            students[RollNum].rollNum,
-            students[RollNum].hasDegree,
-            students[RollNum].myGender,
-            students[RollNum].myClass,
-            numberOfstudents
-            );
-    }
 }
